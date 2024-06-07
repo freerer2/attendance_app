@@ -91,7 +91,7 @@ class Attendance(object):
                         raise e
 
                 retry_f = True  # 출석 실행 플래그
-                while not retry_f:
+                while retry_f:
 
                     if not self.attend_try_cnt == 0:
                         self.log.print(f"출석 {str(self.attend_try_cnt)}회 재시도 중")
