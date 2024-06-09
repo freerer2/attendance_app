@@ -12,7 +12,7 @@ load_dotenv()
 if __name__ == '__main__':
 
     with db_helper.get_resource_rdb() as (cursor, _):
-        cursor.execute(os.getenv('DOMAIN_LIST'))
+        cursor.execute(os.getenv('DOMAIN_LIST'), (os.getenv('GET_DOMAIN_COUNT'), ))
         domain_accnt_list = cursor.fetchall()
 
     if len(domain_accnt_list) > 0:
