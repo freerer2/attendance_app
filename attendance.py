@@ -107,12 +107,12 @@ class Attendance(object):
                                 self.attend_try_cnt += 1
 
                                 if e.args[0] == "Captcha Error":
-                                    self.log.print("출석 실패, 재시도 합니다.")
+                                    self.log.print("Captcha Error 출석 실패, 재시도 합니다.")
                                     retry_f = True  # 행동 에러시 반복
 
                                 else:
-                                    self.browser.quit()
-                                    raise e
+                                    self.log.print("출석 실패, 재시도 합니다.")
+                                    retry_f = True  # 행동 에러시 반복
 
                             else:
                                 self.browser.quit()
