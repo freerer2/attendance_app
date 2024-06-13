@@ -218,43 +218,46 @@ class Attendance(object):
 
     def pass_captcha(self, act_dtl):
         #pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-        self.log.print(f"pass_captcha : param: {act_dtl}")
-        el = self.browser.find_elements("xpath", act_dtl["img_xpath"])[0]
-        target_uuid = str(uuid.uuid1())
-
-        img_name = target_uuid + ".png"
-        el.screenshot(img_name)
-
-        img = np.array(Image.open(img_name))
-
-        norm_img = np.zeros((img.shape[0], img.shape[1]))
-
-        img = cv2.normalize(img, norm_img, 0, 255, cv2.NORM_MINMAX)
-        img = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY)[1]
-        # print(type(cv2.THRESH_BINARY), cv2.THRESH_BINARY)
-        img = cv2.GaussianBlur(img, (1, 1), 0)
-
-        text = pytesseract.image_to_string(img)
-        text = re.sub('[^a-zA-Z0-9]', " ", text).strip().replace(" ", "")
-
-        os.remove(img_name)
-        print(img_name + " 추출결과 : " + text)
-
-        act_dtl["value"] = text
-        self.input_value(act_dtl, "input_xpath")
-
-        self.click_element(act_dtl, "click_xpath")
-
-        alert = self.browser.switch_to.alert
-        alert_text = alert.text
-        alert.accept()
-
-        print("얼럿 : " + alert_text)
-
-        self.log.print(f"pass_captcha : 캡차 문자{text} 입력 완료. {alert_text}")
-
-        if alert_text != act_dtl["complate_msg"]:
-            raise Exception("Captcha Error")
+        try:
+            self.log.print(f"pass_captcha : param: {act_dtl}")
+            el = self.browser.find_elements("xpath", act_dtl["img_xpath"])[0]
+            target_uuid = str(uuid.uuid1())
+    
+            img_name = target_uuid + ".png"
+            el.screenshot(img_name)
+    
+            img = np.array(Image.open(img_name))
+    
+            norm_img = np.zeros((img.shape[0], img.shape[1]))
+    
+            img = cv2.normalize(img, norm_img, 0, 255, cv2.NORM_MINMAX)
+            img = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY)[1]
+            # print(type(cv2.THRESH_BINARY), cv2.THRESH_BINARY)
+            img = cv2.GaussianBlur(img, (1, 1), 0)
+    
+            text = pytesseract.image_to_string(img)
+            text = re.sub('[^a-zA-Z0-9]', " ", text).strip().replace(" ", "")
+    
+            os.remove(img_name)
+            print(img_name + " 추출결과 : " + text)
+    
+            act_dtl["value"] = text
+            self.input_value(act_dtl, "input_xpath")
+    
+            self.click_element(act_dtl, "click_xpath")
+    
+            alert = self.browser.switch_to.alert
+            alert_text = alert.text
+            alert.accept()
+    
+            self.log.print(f"pass_captcha : 캡차 문자 {text} 입력 완료.")
+            self.log.print(f"pass_captcha : 얼럿메세지 {alert_text}")
+    
+            if alert_text != act_dtl["complate_msg"]:
+                raise Exception("Captcha Error")
+                
+        except Exception as e:
+            raise e
 
     def if_pass_captcha(self, act_dtl):
         try:
