@@ -145,6 +145,8 @@ class Attendance(object):
                     with db_helper.get_resource_rdb() as (cursor, _):
                         cursor.execute(os.getenv('UPDATE_ATNDNC_STTS_CD'), ('9', self.domain_seq_id, self.domain_accnt_id,))
 
+            self.browser.quit()
+
     def run_action(self, act_data):
         act_typ_cd = act_data["act_typ_cd"]
         act_dtl = act_data["act_dtl"]
