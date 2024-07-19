@@ -149,7 +149,7 @@ class Attendance(object):
 
     def run_action(self, act_data):
         act_typ_cd = act_data["act_typ_cd"]
-        act_dtl = act_data["act_dtl"]
+        act_dtl_json = act_data["act_dtl_json"]
 
         functios = {
             "move": self.move_url,
@@ -161,29 +161,29 @@ class Attendance(object):
         }
 
         func = functios[act_typ_cd]
-        func(act_dtl)
+        func(act_dtl_json)
 
-    def move_url(self, act_dtl):
-        self.log.print(f"move_url : param: {act_dtl}")
-        url = self.domain_accnt_data["domain_addrs"]+act_dtl["location"]
+    def move_url(self, act_dtl_json):
+        self.log.print(f"move_url : param: {act_dtl_json}")
+        url = self.domain_accnt_data["domain_addrs"]+act_dtl_json["location"]
         self.browser.get(url)
         self.log.print(f"move_url : {url}로 이동 완료")
 
-    def input_value(self, act_dtl, path="xpath"):
-        self.log.print(f"input_value : param: {act_dtl}")
-        xpath = act_dtl[path]
+    def input_value(self, act_dtl_json, path="xpath"):
+        self.log.print(f"input_value : param: {act_dtl_json}")
+        xpath = act_dtl_json[path]
         el_input_value = ""
 
-        if act_dtl.get("value"):
-            el_input_value = act_dtl["value"]
+        if act_dtl_json.get("value"):
+            el_input_value = act_dtl_json["value"]
         else:
-            if act_dtl.get("column"):
-                el_input_value = self.domain_accnt_data[act_dtl["column"]]
+            if act_dtl_json.get("column"):
+                el_input_value = self.domain_accnt_data[act_dtl_json["column"]]
 
         log_value = el_input_value
 
-        if act_dtl.get("decrypt"):
-            if act_dtl["decrypt"] == "Y":
+        if act_dtl_json.get("decrypt"):
+            if act_dtl_json["decrypt"] == "Y":
                 decrypt = AESCipher.decrypt(el_input_value)  # 3.암호화된 메시지를 AES 대칭키 암호화 방식으로 복호화
                 el_input_value = decrypt
 
@@ -192,9 +192,9 @@ class Attendance(object):
         el.send_keys(el_input_value)
         self.log.print(f"input_value : {xpath}에 {log_value} 입력 완료")
 
-    def click_element(self, act_dtl, path="xpath"):
-        self.log.print(f"click_element : param: {act_dtl}, {path}")
-        xpath = act_dtl[path]
+    def click_element(self, act_dtl_json, path="xpath"):
+        self.log.print(f"click_element : param: {act_dtl_json}, {path}")
+        xpath = act_dtl_json[path]
         try:
             el = self.browser.find_elements("xpath", xpath)[0]
             try:
@@ -212,17 +212,17 @@ class Attendance(object):
         except Exception as e:
             raise e
 
-    def confirm_alert(self, act_dtl):
+    def confirm_alert(self, act_dtl_json):
         self.log.print(f"confirm_alert")
         alert = self.browser.switch_to.alert
         alert.accept()
         self.log.print(f"confirm_alert : 얼럿창 확인완료")
 
-    def pass_captcha(self, act_dtl):
+    def pass_captcha(self, act_dtl_json):
         #pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
         try:
-            self.log.print(f"pass_captcha : param: {act_dtl}")
-            el = self.browser.find_elements("xpath", act_dtl["img_xpath"])[0]
+            self.log.print(f"pass_captcha : param: {act_dtl_json}")
+            el = self.browser.find_elements("xpath", act_dtl_json["img_xpath"])[0]
             target_uuid = str(uuid.uuid1())
     
             img_name = target_uuid + ".png"
@@ -243,10 +243,10 @@ class Attendance(object):
             os.remove(img_name)
             print(img_name + " 추출결과 : " + text)
     
-            act_dtl["value"] = text
-            self.input_value(act_dtl, "input_xpath")
+            act_dtl_json["value"] = text
+            self.input_value(act_dtl_json, "input_xpath")
     
-            self.click_element(act_dtl, "click_xpath")
+            self.click_element(act_dtl_json, "click_xpath")
     
             alert = self.browser.switch_to.alert
             alert_text = alert.text
@@ -255,17 +255,17 @@ class Attendance(object):
             self.log.print(f"pass_captcha : 캡차 문자 {text} 입력 완료.")
             self.log.print(f"pass_captcha : 얼럿메세지 {alert_text}")
     
-            if alert_text != act_dtl["complate_msg"]:
+            if alert_text != act_dtl_json["complate_msg"]:
                 raise Exception("Captcha Error")
                 
         except Exception as e:
             raise e
 
-    def if_pass_captcha(self, act_dtl):
+    def if_pass_captcha(self, act_dtl_json):
         try:
-            self.log.print(f"if_pass_captcha : param: {act_dtl}")
-            if len(self.browser.find_elements("xpath", act_dtl["img_xpath"])) > 0:
-                self.pass_captcha(act_dtl)
+            self.log.print(f"if_pass_captcha : param: {act_dtl_json}")
+            if len(self.browser.find_elements("xpath", act_dtl_json["img_xpath"])) > 0:
+                self.pass_captcha(act_dtl_json)
         except UnexpectedAlertPresentException:
             self.log.print(f"if_pass_captcha : 캡차 없음")
             return
